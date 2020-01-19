@@ -16,6 +16,8 @@ Environment="VOLUME_ARGS=--enable-volume-normalisation --linear-volume --initial
 Environment="BACKEND_ARGS=--backend alsa"
 EnvironmentFile=-/etc/default/raspotify
 ExecStart=/usr/bin/librespot --name ${DEVICE_NAME} $BACKEND_ARGS --bitrate ${BITRATE} $CACHE_ARGS $VOLUME_ARGS $OPTIONS
+ExecStartPost=/bin/bash -c "firewall-cmd --add-port=4070/tcp --zone=public --permanent && firewall-cmd --add-port=5353/udp --zone=public --permanent && firewall-cmd --add-port=$(sudo netstat -plantu | grep -- '/librespot' | grep -m 1 -o -P '(?<=:)\w*?(?=\h)')/tcp --zone=public --permanent && firewall-cmd --reload"
+ExecStop=/bin/bash -c "firewall-cmd --remove-port=4070/tcp --zone=public --permanent && firewall-cmd --remove-port=5353/udp --zone=public --permanent && firewall-cmd --remove-port=$(sudo netstat -plantu | grep -- '/librespot' | grep -m 1 -o -P '(?<=:)\w*?(?=\h)')/tcp --zone=public --permanent && firewall-cmd --reload"
 
 [Install]
 WantedBy=multi-user.target
